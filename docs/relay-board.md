@@ -6,27 +6,12 @@ On a legacy cabinet, the 16 segment ticker, the spotlights and the neon are not 
 PC --USB--> BIO2 --RS-232--> relay board --RS-422--> ticker board --RS-422--> spotlights / neon
 ```
 
-With `MODE=RELAY`, tickerhook takes the place of the BIO2 on that RS-232 link. All you need is a USB to RS-232 adapter.
+With `MODE=RELAY`, tickerhook takes the place of the BIO2 on that RS-232 link. All you need is a RS-232 Serial interface.
 
 ## What you need
 
-* A **USB to RS-232 adapter** with a DB9 plug. It has to be real RS-232, not a 3.3v/5v "TTL serial" module: the relay board uses RS-232 voltage levels, which would damage a TTL module. Adapters with a Prolific PL2303GT chip are known to work.
-* Three wires from the adapter to the relay board. A DB9 breakout (screw terminals) makes this easy.
-* A multimeter with a continuity (beep) setting, to find the right pins.
-
-## Finding the pins on the relay board
-
-The BIO2 cable plugs into a JST connector on the relay board. Behind it sits an **ADM232A** RS-232 transceiver, and the three pins you need are on that chip. Its pinout is the same as the common MAX232, but check it against the ADM232A datasheet before relying on it:
-
-| ADM232A pin | Function | What it is for you |
-| :---: | :--- | :--- |
-| 14 or 7 | Transmitter output | The relay board **transmits** here |
-| 13 or 8 | Receiver input | The relay board **receives** here |
-| 15 | Ground | Ground |
-
-The chip has two transmitters and two receivers; only one of each is wired to the JST connector. With the relay board **unpowered**, use the continuity setting between each JST pin and pins 14, 7, 13, 8 and 15 of the ADM232A to find out which JST pin goes where.
-
-You can double check with the board powered and nothing connected: measured against pin 15, the transmitter output that is in use sits at about -5 to -10 V, the receiver input at about 0 V.
+* A RS-232 interface. It has to be real RS-232, not a 3.3v/5v "TTL serial" module: I'm using my motherboard's serial header but another great option are adapters with prolific chipsets such as the Ugreen USB To RS-232
+* Three wires from the adapter to the relay board. Dupont jumpers work but a female DB9 breakout is cleaner.
 
 ## Wiring
 
@@ -38,34 +23,9 @@ Keep the relay board powered the way it normally is in the cabinet, and leave it
 | :---: | :--- |
 | 2 (RXD) | 1 |
 | 3 (TXD) | 3 |
-| 5 (GND) | Ground |
+| 5 (GND) | 2 |
 
 Getting 2 and 3 the wrong way round does no harm with RS-232; the board simply will not answer. Swap them and try again.
-
-## Testing without the game
-
-Build the dll and the test tool (see [Building](../README.md#building) in the README). Then put a `tickerhook.conf` in a folder:
-
-```
-PORT=COM20
-MODE=RELAY
-SPOTLIGHT_INTERVAL=1000
-NEON_INTERVAL=-1
-```
-
-`PORT` is the adapter's COM port; Device Manager lists it under "Ports (COM & LPT)". From that folder run:
-
-```
-relaytest.exe "HELLO WORLD" 10
-```
-
-For 10 seconds the ticker should scroll `HELLO WORLD`, the spotlights should blink once a second and the neon should stay on. Every two seconds the tool prints how many replies came back from the relay board, and where the faders are:
-
-```
-replies 211, faders 1-5: 15 15 15 15 15
-```
-
-Without the number of seconds it keeps running, and every line you type is sent to the ticker.
 
 ## Using it with the game
 
