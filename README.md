@@ -13,7 +13,7 @@ launcher.exe:
 spice.exe/spice64.exe:  
 `spice64 -k TickerHook.dll`  
 
-After this, configure the COM port by creating a `tickerhook.conf` file (see [tickerhook.conf.example](tickerhook.conf.example) for every option).
+After this, configure the COM port by creating a `tickerhook.conf` file (see [tickerhook.conf.example](tickerhook.conf) for every option).
 
 ```
 PORT=COM1
