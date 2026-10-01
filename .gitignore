@@ -38,7 +38,9 @@ dist/
 *.exe
 *.lib
 
-# --- Local settings: tickerhook.conf.example is the one that is tracked
+# --- Local settings: legacydj.conf.example is the one that is tracked
+legacydj.conf
+# the old name, from before the rename
 tickerhook.conf
 
 # --- Operating system clutter

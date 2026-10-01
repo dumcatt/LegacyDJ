@@ -10,7 +10,7 @@
 #include <memory>
 #include "TickerDisplay.h"
 
-// Sends the ticker to the COM port given in tickerhook.conf, either
+// Sends the ticker to the COM port given in legacydj.conf, either
 //   MODE=RELAY    straight to the sub IO ("relay board") in place of a BIO2
 //   MODE=ARDUINO  as a line of text, for the iidx-BiTwinkIO Arduino sketch
 class serial_server {
@@ -29,9 +29,9 @@ public:
     }
 
     void LoadConfig() {
-        std::ifstream configFile("tickerhook.conf");
+        std::ifstream configFile("legacydj.conf");
         if (!configFile.is_open()) {
-            std::cout << "Could not open tickerhook.conf, using defaults PORT=" << port << " BAUD=" << baudrate << std::endl;
+            std::cout << "Could not open legacydj.conf, using defaults PORT=" << port << " BAUD=" << baudrate << std::endl;
             return;
         }
 
@@ -69,6 +69,9 @@ public:
                 read_number(key, value, config.neon_interval_ms);
             } else if (key == "SEND_INTERVAL") {
                 read_number(key, value, send_interval_ms);
+            } else if (key.compare(0, 5, "FADER") == 0 || key.compare(0, 6, "KEYPAD") == 0) {
+                // effector faders (FaderMapping.h) and card reader keypads (KeypadDecoder.h)
+                hook_settings.push_back(std::make_pair(key, value));
             } else if (key == "STATIC_TEXT") {
                 // the first STATIC_TEXT line replaces the built-in list,
                 // an empty one leaves the list empty
@@ -171,8 +174,19 @@ public:
     // Stops relay_loop (for the test tool; the game just unloads)
     void stop() { running = false; }
 
-    unsigned long replies() const { return parser.replies; }
-    const uint8_t* faders() const { return parser.faders; }
+    unsigned long replies() const { return reply_count; }
+
+    // Fader bytes of the latest reply from the relay board, safe to call from
+    // any thread. False until the board has answered once.
+    bool faders(uint8_t out[relay_board::FADER_COUNT]) const {
+        uint64_t bits = fader_bits;
+        if (!(bits >> 63)) return false;
+        for (int i = 0; i < relay_board::FADER_COUNT; i++) out[i] = (uint8_t)(bits >> (8 * i));
+        return true;
+    }
+
+    // FADER* and KEYPAD* settings, key in upper case, as they appear in the config
+    const std::vector<std::pair<std::string, std::string>>& game_hook_settings() const { return hook_settings; }
 
 private:
     void relay_loop() {
@@ -197,11 +211,20 @@ private:
                 return;
             }
 
-            // Replies are only read to tell whether the board is there
+            // Replies tell whether the board is there and carry the faders
             uint8_t buffer[256];
             DWORD bytesRead = 0;
             while (ReadFile(hComm, buffer, sizeof(buffer), &bytesRead, NULL) && bytesRead > 0) {
-                for (DWORD i = 0; i < bytesRead; i++) parser.feed(buffer[i]);
+                for (DWORD i = 0; i < bytesRead; i++) {
+                    if (parser.feed(buffer[i])) {
+                        uint64_t bits = 1ull << 63;
+                        for (int f = 0; f < relay_board::FADER_COUNT; f++) {
+                            bits |= (uint64_t)parser.faders[f] << (8 * f);
+                        }
+                        fader_bits = bits;
+                        reply_count = parser.replies;
+                    }
+                }
             }
 
             if (now - lastReplyCheck >= 2000) {
@@ -251,6 +274,9 @@ private:
     ticker_config config;
     std::unique_ptr<ticker_display> display;
     std::mutex display_lock;
+    std::vector<std::pair<std::string, std::string>> hook_settings;
     relay_board::reply_parser parser;
+    std::atomic<uint64_t> fader_bits{0};
+    std::atomic<unsigned long> reply_count{0};
     std::atomic<bool> running{false};
 };

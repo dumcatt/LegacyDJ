@@ -6,7 +6,7 @@ On a legacy cabinet, the 16 segment ticker, the spotlights and the neon are not 
 PC --USB--> BIO2 --RS-232--> relay board --RS-422--> ticker board --RS-422--> spotlights / neon
 ```
 
-With `MODE=RELAY`, tickerhook takes the place of the BIO2 on that RS-232 link. All you need is a RS-232 Serial interface.
+With `MODE=RELAY`, legacydj takes the place of the BIO2 on that RS-232 link. All you need is a RS-232 Serial interface.
 
 ## What you need
 
@@ -29,7 +29,7 @@ Getting 2 and 3 the wrong way round does no harm with RS-232; the board simply w
 
 ## Using it with the game
 
-Copy `tickerhook.dll` and your `tickerhook.conf` into the game folder and load the dll as described in the README. The console window it opens says:
+Copy `legacydj.dll` and your `legacydj.conf` into the game folder and load the dll as described in the README. The console window it opens says:
 
 ```
 Serial port COM20 opened successfully at 115200 baud.
@@ -49,7 +49,7 @@ and, if the board stops answering for more than two seconds, `Relay board is not
 
 ## Limitations
 
-* The relay board also reads the effector panel's five faders (and probably its buttons). tickerhook reads the faders, but does not pass them on to the game.
+* The relay board also reads the effector panel's five faders (and probably its buttons). legacydj reads them; passing them on to the game is in progress, see [effector-faders.md](effector-faders.md).
 * The effector button lamps are always sent as off.
 * Which bit in the spotlight byte belongs to which spotlight is taken from MAME's twinkle driver and has not been checked on a cabinet one spotlight at a time.
 

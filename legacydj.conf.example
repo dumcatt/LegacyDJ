@@ -1,0 +1,56 @@
+# COM port of the RS-232 adapter wired to the sub IO ("relay board")
+PORT=COM20
+
+# RELAY   talk to the relay board directly, in place of a BIO2 (always 115200 baud)
+# ARDUINO send the text as a line to the iidx-BiTwinkIO Arduino sketch
+MODE=RELAY
+# Only used in ARDUINO mode
+BAUD=115200
+
+# Milliseconds per scroll step, and spaces between the end and the start of scrolling text
+SCROLL_INTERVAL=300
+SCROLL_GAP=12
+
+# Spotlights and neon, in milliseconds:
+#   >0  on for that long, then off for that long, and so on
+#    0  always off
+#   -1  always on
+SPOTLIGHT_INTERVAL=1000
+NEON_INTERVAL=-1
+
+# Text containing one of these (and at most 9 characters long) is centred
+# and does not scroll. The first STATIC_TEXT line replaces the built-in list:
+#   *********  DEMO PLAY  WELCOME  ENTRY  DECIDE!  MODE?  STAY COOL  TUTORIAL
+# A single empty "STATIC_TEXT=" makes every text scroll.
+#STATIC_TEXT=DEMO PLAY
+#STATIC_TEXT=WELCOME
+
+# Milliseconds between two packets to the relay board. A BIO2 sends one every 8ms.
+SEND_INTERVAL=8
+
+# Effector faders (64-bit games with a TDJ mode only)
+#   ON   the physical faders set the subscreen effector sliders when moved
+#   LOG  only log the sliders and the faders (console and legacydj.log)
+#   OFF  leave the effector alone, nothing is hooked
+FADERS=ON
+
+# Which sliders each fader sets, comma separated, empty for none. Names:
+#   vefx low hi filter play_volume low_mid hi_mid
+FADER1=vefx
+FADER2=low, low_mid
+FADER3=hi, hi_mid
+FADER4=filter
+FADER5=play_volume
+
+# 1 if the faders work the wrong way round
+FADER_INVERT=0
+# How far (0-7, of 16 raw counts per step) a fader must move past a step
+# boundary before its value changes; stops a resting fader from flickering
+FADER_DEADBAND=3
+
+# Card reader keypads in TDJ mode (64-bit games only)
+#   ON   the reader keypads work like the touch keypad: digits, 00 = erase,
+#        . = show/hide the touch keypad
+#   LOG  only log the key presses (console and legacydj.log)
+#   OFF  leave the keypads alone, nothing is hooked
+KEYPAD=ON

@@ -1,6 +1,6 @@
-// Tries the relay board mode of tickerhook without the game.
+// Tries the relay board mode of legacydj without the game.
 //
-// Reads tickerhook.conf from the current folder exactly like the hook does,
+// Reads legacydj.conf from the current folder exactly like the hook does,
 // shows the text given on the command line, then shows every line typed in.
 // Fader positions are printed every two seconds. "quit" exits.
 // With a number of seconds after the text it runs that long instead of
@@ -9,7 +9,7 @@
 //   relaytest.exe "HELLO WORLD"
 //   relaytest.exe "HELLO WORLD" 10
 
-#include "../TickerHook/SerialServer.cpp"
+#include "../LegacyDJ/SerialServer.cpp"
 
 #include <thread>
 
@@ -24,9 +24,12 @@ int main(int argc, char** argv) {
         while (!quit) {
             for (int i = 0; i < 20 && !quit; i++) Sleep(100);
             if (quit) break;
-            const uint8_t* f = server.faders();
-            std::cout << "replies " << server.replies() << ", faders 1-5:";
-            for (int i = 0; i < relay_board::FADER_COUNT; i++) std::cout << ' ' << (f[i] >> 4);
+            uint8_t f[relay_board::FADER_COUNT];
+            std::cout << "replies " << server.replies();
+            if (server.faders(f)) {
+                std::cout << ", faders 1-5:";
+                for (int i = 0; i < relay_board::FADER_COUNT; i++) std::cout << ' ' << (f[i] >> 4);
+            }
             std::cout << std::endl;
         }
     });

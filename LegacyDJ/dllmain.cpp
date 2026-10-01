@@ -1,6 +1,10 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "SerialServer.cpp"
+#if _WIN64
+#include "EffectorHook.h"
+#include "KeypadHook.h"
+#endif
 
 #if _WIN64
 #pragma comment(lib, "libMinHook.x64.lib")
@@ -574,14 +578,56 @@ int DecideModule()
     return 0;
 }
 
+#if _WIN64
+// The FADER* or the KEYPAD* settings from the config
+std::vector<std::pair<std::string, std::string>> SettingsStartingWith(const std::string& prefix)
+{
+    std::vector<std::pair<std::string, std::string>> picked;
+    for (const auto& kv : s.game_hook_settings()) {
+        if (kv.first.compare(0, prefix.size(), prefix) == 0) picked.push_back(kv);
+    }
+    return picked;
+}
+
+// The effector sliders and the touch keypad only exist in the 64-bit games with a TDJ mode
+void InstallGameHooks(MODULEINFO moduleInfo)
+{
+    uint8_t* module = static_cast<uint8_t*>(moduleInfo.lpBaseOfDll);
+
+    effector::fader_config faders;
+    for (const std::string& error : effector::parse_fader_settings(SettingsStartingWith("FADER"), faders)) {
+        std::cout << "Effector config: " << error << std::endl;
+    }
+    if (faders.mode == effector::fader_mode::off) {
+        std::cout << "FADERS=OFF, effector faders not hooked" << std::endl;
+    } else {
+        effector::monitor::instance().install(module,
+            [](uint8_t out[effector::PHYSICAL_COUNT]) { return s.faders(out); }, faders);
+    }
+
+    keypad::keypad_config keys;
+    for (const std::string& error : keypad::parse_keypad_settings(SettingsStartingWith("KEYPAD"), keys)) {
+        std::cout << "Keypad config: " << error << std::endl;
+    }
+    if (keys.mode == keypad::keypad_mode::off) {
+        std::cout << "KEYPAD=OFF, card reader keypads not hooked" << std::endl;
+    } else {
+        keypad::monitor::instance().install(module, keys);
+    }
+}
+#endif
+
 DWORD WINAPI SearchAndHook(LPVOID hModule)
 {
-    unsigned int hooksMade = 0;
-
     MODULEINFO moduleInfo;
 
+    // The dll can be loaded before the game module, give it some time
     int moduleType = DecideModule();
-	
+    for (int waited = 0; moduleType == 0 && waited < 600; waited++) {
+        Sleep(100);
+        moduleType = DecideModule();
+    }
+
 	switch (moduleType)
     {
     case 0:
@@ -590,10 +636,16 @@ DWORD WINAPI SearchAndHook(LPVOID hModule)
     case 1:
 		GetModuleInformation(GetCurrentProcess(), GetModuleHandleA("bm2dx.dll"), &moduleInfo, sizeof(moduleInfo));
         HookDllType(moduleInfo);
+#if _WIN64
+        InstallGameHooks(moduleInfo);
+#endif
 		break;
     case 2:
         GetModuleInformation(GetCurrentProcess(), GetModuleHandleA("bm2dx_omni.dll"), &moduleInfo, sizeof(moduleInfo));
         HookDllType(moduleInfo);
+#if _WIN64
+        InstallGameHooks(moduleInfo);
+#endif
         break;
     case 3:
 		GetModuleInformation(GetCurrentProcess(), GetModuleHandleA("bm2dx.exe"), &moduleInfo, sizeof(moduleInfo));

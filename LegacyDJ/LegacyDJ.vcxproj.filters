@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -24,6 +24,30 @@
     <ClInclude Include="TickerDisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EffectorHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FaderMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeypadDecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeypadHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeypadLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Signature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -32,7 +56,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WSServer.cpp">
+    <ClCompile Include="SerialServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
