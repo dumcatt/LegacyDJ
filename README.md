@@ -24,6 +24,8 @@ KEYPAD=ON
 
 Everything the dll does is also written to `legacydj.log` in the game folder.
 
+Tested on IIDX 22, 31, 33, 34
+
 # Relay board mode
 With `MODE=RELAY` (the default) the dll takes the place of a BIO2 and talks to the sub IO ("relay board") of the cabinet directly, through a serial connection. **[How to connect the relay board](docs/relay-board.md)** covers the adapter, finding the pins, wiring, testing and troubleshooting.
 
